@@ -1,0 +1,3 @@
+{% macro nav_element(url, title) -%}
+  <li {%- if request.path == url_for('{}'.format(url)) %} class="active"{%- endif %}><a href="{{url_for('{}'.format(url))}}">{{title}}</a></li>
+{%- endmacro %}

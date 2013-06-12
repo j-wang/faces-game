@@ -1,0 +1,58 @@
+{% extends "layout.html" %}
+{% block head %}
+  {{ super() }}
+     <style type="text/css">
+       .displace-more {
+         padding-top: 20px
+       }
+
+       .displace-less {
+         padding-top: 10px
+       }
+     </style>
+{% endblock %}
+{% block title %}Hacker School Faces Game!{% endblock %}
+{% block content %}
+<div class="row text-center">
+  <div class="span6 offset3">
+    <p class="lead">{%- if not answer %}Who is this?{% else %}{{ name }}{% endif -%}</p>
+    <div class="row">
+      <div class="span6">
+	<img src="https://www.hackerschool.com{{ pic }}" alt="schooler"></img>
+      </div>
+    </div>
+    <div class="row">
+      {%- if not answer %}
+      <div class="span2 offset2 displace-more">
+	<form name="form_choice" method="post" action="game">
+	  {% for name in names %}
+	  <label class="radio">
+	    <input type="radio" name="name_choice" value="{{ name }}">
+	    {{ name }}
+	  </label>
+	  {% endfor %}
+	  <div class="row displace-less">
+	    <button type="submit" class="btn">Submit</button>
+	  </div>
+	</form>
+      </div>
+      {% else %}
+      <div class="span4 offset1">
+	{%- if answer %}
+	{% if correct %}
+	<h4 class="text-success">Correct!</h4>
+	{% else %}
+	<h4 class="text-error">Wrong!</h4>
+	{% endif %}
+	{% endif -%}
+	<p>Ask me about:</p>
+	<p>{{ skills }}</p>
+	<form method="get" action="game">
+	  <button type="submit" class="btn">Next Person</button>
+	</form>
+      </div>
+      {% endif -%}
+    </div>
+  </div>
+</div>
+{% endblock %}
