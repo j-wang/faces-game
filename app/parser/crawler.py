@@ -7,17 +7,6 @@ import lxml.html.soupparser
 import mechanize
 
 
-def run_crawler(spider, **kwargs):
-    """Runs the crawl. Takes spider to run and keyword arguments needed by
-    spider (e.g. username and password). Raises LoginFailedException (through
-    spider) if login fails. Otherwise, returns scraped items in a list.
-
-    """
-    the_spider = spider(**kwargs)
-    the_spider.attempt_login()
-    return the_spider.items
-
-
 class LoginFailedException(Exception):
     """Exception raised if login credentials are rejected."""
     def __init__(self, value):
@@ -47,6 +36,11 @@ class SuperSpider(object):
     def __init__(self, username, password):
         self.user = username
         self.pw = password
+
+    def run_crawler(self):
+        """Runs the spider and crawls the site."""
+        self.attempt_login()
+        return self.items
 
     def attempt_login(self):
         request = mechanize.Request(self.start_url)

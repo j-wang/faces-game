@@ -6,7 +6,7 @@
 from flask import Flask, render_template, redirect, request, url_for, \
     abort, flash, session
 from flask_sslify import SSLify
-from parser.crawler import run_crawler, HackerSchoolerSpider, BatchSpider, \
+from parser.crawler import HackerSchoolerSpider, BatchSpider, \
     LoginFailedException
 import random
 import os
@@ -36,8 +36,8 @@ def choose_batch():
         if not allin(session, 'email', 'password'):
             return redirect(url_for('index'))  # redirect no-logins
         try:
-            items = run_crawler(BatchSpider, username=session['email'],
-                                password=session['password'])
+            items = BatchSpider(username=session['email'],
+                                password=session['password']).run_crawler()
         except LoginFailedException:  # login rejected
             flash("Invalid login. Please check your email or password.")
             return redirect(url_for('index'))
@@ -61,10 +61,9 @@ def game():
         if not allin(session, 'email', 'password', 'batch'):
             return redirect(url_for('index'))  # redirect no-logins
         else:
-            schoolers = run_crawler(HackerSchoolerSpider,
-                                    username=session['email'],
-                                    password=session['password'],
-                                    batch=session['batch'])
+            schoolers = HackerSchoolerSpider(session['email'],
+                                             session['password'],
+                                             session['batch']).run_crawler()
             the_chosen_one = random.choice(schoolers)
             session['chosen'] = the_chosen_one
             name, pic, skills = the_chosen_one  # deconstruct tuple
