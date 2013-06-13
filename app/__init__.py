@@ -5,12 +5,14 @@
 
 from flask import Flask, render_template, redirect, request, url_for, \
     abort, flash, session
+from flask_sslify import SSLify
 from parser.crawler import run_crawler, HackerSchoolerSpider, BatchSpider, \
     LoginFailedException
 import random
 import os
 
 app = Flask(__name__)
+sslify = SSLify(app)
 
 app.secret_key = "this_is_a_test_key_for_local_testing"
 if 'SECRET_KEY' in os.environ:
