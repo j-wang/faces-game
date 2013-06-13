@@ -4,15 +4,17 @@
 """Runs HackerSchooler Faces Web Interface"""
 
 from flask import Flask, render_template, redirect, request, url_for, \
-    abort, flash
+    abort, flash, session
 from parser.crawler import run_crawler, HackerSchoolerSpider, BatchSpider, \
     LoginFailedException
 import random
+import os
 
 app = Flask(__name__)
-app.secret_key = "dsAQkfj#$(Snc!@"
-app.vars = {}
-app.vars['difficulty'] = "medium"  # hardcoded difficulty for now
+
+app.secret_key = "this_is_a_test_key_for_local_testing"
+if 'SECRET_KEY' in os.environ:
+    app.secret_key = os.environ['SECRET_KEY']  # pull secret key
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -21,19 +23,19 @@ def index():
     if request.method == 'GET':
         return render_template("index.html")
     else:
-        app.vars['email'] = request.form['inputEmail']
-        app.vars['password'] = request.form['inputPassword']
+        session['email'] = request.form['inputEmail']
+        session['password'] = request.form['inputPassword']
         return redirect(url_for('choose_batch'))
 
 
 @app.route('/choose_batch', methods=['GET', 'POST'])
 def choose_batch():
     if request.method == 'GET':
-        if not allin(app.vars, 'email', 'password'):
+        if not allin(session, 'email', 'password'):
             return redirect(url_for('index'))  # redirect no-logins
         try:
-            items = run_crawler(BatchSpider, username=app.vars['email'],
-                                password=app.vars['password'])
+            items = run_crawler(BatchSpider, username=session['email'],
+                                password=session['password'])
         except LoginFailedException:  # login rejected
             flash("Invalid login. Please check your email or password.")
             return redirect(url_for('index'))
@@ -41,7 +43,7 @@ def choose_batch():
             return render_template("choose_batch.html",
                                    batches=items)
     else:
-        app.vars['batch'] = request.form['batch']
+        session['batch'] = request.form['batch']
         return redirect(url_for('game'))
 
 
@@ -54,18 +56,19 @@ def difficulty():
 @app.route('/game', methods=['GET', 'POST'])
 def game():
     if request.method == "GET":
-        if not allin(app.vars, 'email', 'password', 'batch'):
+        if not allin(session, 'email', 'password', 'batch'):
             return redirect(url_for('index'))  # redirect no-logins
         else:
             schoolers = run_crawler(HackerSchoolerSpider,
-                                    username=app.vars['email'],
-                                    password=app.vars['password'],
-                                    batch=app.vars['batch'])
+                                    username=session['email'],
+                                    password=session['password'],
+                                    batch=session['batch'])
             the_chosen_one = random.choice(schoolers)
-            app.vars['chosen'] = the_chosen_one
+            session['chosen'] = the_chosen_one
             name, pic, skills = the_chosen_one  # deconstruct tuple
+            session['difficulty'] = "medium"  # hardcoded for now
             the_names = present_choices(the_chosen_one, schoolers,
-                                        app.vars['difficulty'])
+                                        session['difficulty'])
             return render_template("game.html",
                                    answer=False,
                                    correct=False,
@@ -73,7 +76,7 @@ def game():
                                    names=the_names)
     else:
         user_answer = request.form['name_choice']
-        name, pic, skills = app.vars['chosen']
+        name, pic, skills = session['chosen']
         answer = True
         if user_answer == name:
             correct = True
@@ -94,6 +97,12 @@ def about():
 @app.route('/contact')
 def contact():
     return render_template("contact.html")
+
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('index'))
 
 
 def present_choices(chosen, schooler3Tuples, difficulty):
@@ -125,4 +134,4 @@ def allin(the_dict, *args):
 
 
 if __name__ == '__main__':
-    app.run(debug=False)
+    app.run(debug=True)
