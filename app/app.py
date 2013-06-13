@@ -71,7 +71,7 @@ def game():
                                    correct=False,
                                    name=name, pic=pic,
                                    names=the_names)
-    if request.method == "POST":
+    else:
         user_answer = request.form['name_choice']
         name, pic, skills = app.vars['chosen']
         answer = True

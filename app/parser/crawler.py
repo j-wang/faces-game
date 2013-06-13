@@ -102,11 +102,11 @@ class HackerSchoolerSpider(SuperSpider):
 
         names = soup.xpath(batch_select + "/div[@class='name']/a/text()")
         pics = soup.xpath(batch_select + "/a/img[@class='profile-image']/@src")
-        skills = soup.xpath(batch_select + "/span[@class='skills']/text()")
+        skills = soup.xpath(batch_select + "/span[@class='skills']")
 
         names_raw = get_strs_from_lxml_list(names)
         pics_raw = get_strs_from_lxml_list(pics)
-        skills_raw = get_strs_from_lxml_list(skills)
+        skills_raw = [sk.text_content() for sk in skills]  # handle empties
 
         self.items = zip(names_raw, pics_raw, skills_raw)
 
