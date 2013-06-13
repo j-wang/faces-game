@@ -38,6 +38,7 @@ class SuperSpider(object):
     baseaddress = "https://www.hackerschool.com"
     start_url = baseaddress + "/login"
     target_url = baseaddress + "/private"
+    end_url = baseaddress + "/logout"
 
     user = ""
     pw = ""
@@ -70,6 +71,10 @@ class SuperSpider(object):
     def action(response):
         raise NotImplementedError("SuperSpider.action must be implemented!")
 
+    def logout(self):
+        request = mechanize.Request(self.end_url)
+        mechanize.urlopen(request)
+
 
 class BatchSpider(SuperSpider):
     """Spider that scrapes Hacker School website for batches (so the game can
@@ -82,6 +87,7 @@ class BatchSpider(SuperSpider):
         soup = lxml.html.soupparser.fromstring(html)
         batches = soup.xpath("//ul[@id='batches']/li/ul/@id")
         self.items = get_strs_from_lxml_list(batches)
+        self.logout()
 
 
 class HackerSchoolerSpider(SuperSpider):
@@ -109,6 +115,7 @@ class HackerSchoolerSpider(SuperSpider):
         skills_raw = [sk.text_content() for sk in skills]  # handle empties
 
         self.items = zip(names_raw, pics_raw, skills_raw)
+        self.logout()
 
 
 def get_strs_from_lxml_list(lxml_objects):

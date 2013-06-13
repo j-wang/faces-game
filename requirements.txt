@@ -1,5 +1,6 @@
 BeautifulSoup==3.2.1
 Flask==0.9
+Flask-SSLify==0.1.4
 Jinja2==2.7
 MarkupSafe==0.18
 Werkzeug==0.8.3
